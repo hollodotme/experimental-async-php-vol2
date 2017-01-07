@@ -1,6 +1,6 @@
 {
-	"name": "hollodotme/experimental-async-php-vol1",
-	"description": "First try to run a PHP daemon subscribing to redis channels and executing commands async on the php-fpm socket",
+	"name": "hollodotme/experimental-async-php-vol2",
+	"description": "Second try to run a PHP daemon receiving messages from RabbtiMQ and executing commands async on the php-fpm socket",
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"license": "MIT",
@@ -12,8 +12,8 @@
 	],
 	"require": {
 		"php": ">=7.1",
-		"ext-redis": "*",
-		"hollodotme/fast-cgi-client": "^2.0"
+		"hollodotme/fast-cgi-client": "^2.0",
+		"php-amqplib/php-amqplib": "^2.6"
 	},
 	"autoload": {
 		"psr-4": {

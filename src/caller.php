@@ -7,11 +7,18 @@ namespace hollodotme\AsyncPhp;
 
 require(__DIR__ . '/../vendor/autoload.php');
 
-$redis = new \Redis();
-$redis->connect( 'localhost', 6379, 2.0 );
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
-$message = [
-	'timestamp' => date( 'c' ),
-];
+$connection = new AMQPStreamConnection( 'localhost', 5672, 'guest', 'guest' );
+$channel    = $connection->channel();
 
-$redis->publish( 'commands', json_encode( $message, JSON_PRETTY_PRINT ) );
+$channel->queue_declare( 'commands' );
+
+$message = new AMQPMessage( 'Do something' );
+$channel->basic_publish( $message, '', 'commands' );
+
+echo " [x] Sent 'Do something' to 'commands'\n";
+
+$channel->close();
+$connection->close();
