@@ -1,0 +1,10 @@
+[Unit]
+Description=PHP Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/php7.1 -d "default_socket_timeout=-1" -f /vagrant/src/daemon.php
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
