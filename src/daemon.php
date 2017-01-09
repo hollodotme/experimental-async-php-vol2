@@ -21,18 +21,16 @@ $channel->queue_declare( 'commands' );
 
 # Prepare the Fast CGI Client
 $unixDomainSocket = new UnixDomainSocket( 'unix:///var/run/php/php7.1-fpm-commands.sock' );
-$fpmClient        = new Client( $unixDomainSocket );
 
 # Define a callback function that is invoked whenever a message is consumed
-$callback = function ( AMQPMessage $message ) use ( $fpmClient )
+$callback = function ( AMQPMessage $message ) use ( $unixDomainSocket )
 {
-	echo " [x] Received:\n", $message->getBody(), "\n";
-
 	# Decode the json message and encode it for sending to php-fpm
-	$messageArray = json_decode( $message->getBody() );
+	$messageArray = json_decode( $message->getBody(), true );
 	$body         = http_build_query( $messageArray );
 
 	# Send an async request to php-fpm pool and receive a process ID
+	$fpmClient = new Client( $unixDomainSocket );
 	$processId = $fpmClient->sendAsyncRequest(
 		[
 			'GATEWAY_INTERFACE' => 'FastCGI/1.0',
@@ -51,7 +49,7 @@ $callback = function ( AMQPMessage $message ) use ( $fpmClient )
 		$body
 	);
 
-	echo "Spawned process with ID: {$processId}\n";
+	echo " [x] Spawned process with ID {$processId} for message number {$messageArray['number']}\n";
 };
 
 # Request consumption for queue "commands" using the defined callback function

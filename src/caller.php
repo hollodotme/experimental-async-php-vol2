@@ -18,10 +18,10 @@ $channel    = $connection->channel();
 $channel->queue_declare( 'commands' );
 
 # Create and send the message
-$message = new AMQPMessage( json_encode( [ 'timestamp' => date( 'c' ) ], JSON_PRETTY_PRINT ) );
+$message = new AMQPMessage( json_encode( [ 'number' => $argv[1] ], JSON_PRETTY_PRINT ) );
 $channel->basic_publish( $message, '', 'commands' );
 
-echo " [x] Message sent.\n";
+echo " [x] Message sent: {$argv[1]}\n";
 
 # Close channel and connection
 $channel->close();
