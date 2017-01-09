@@ -15,10 +15,16 @@ $connection = new AMQPStreamConnection( 'localhost', 5672, 'guest', 'guest' );
 $channel    = $connection->channel();
 
 # Make sure the queue 'commands' exist
-$channel->queue_declare( 'commands' );
+# Make the queue persistent (set 3rd parameter to true)
+$channel->queue_declare( 'commands', false, true );
 
 # Create and send the message
-$message = new AMQPMessage( json_encode( [ 'number' => $argv[1] ], JSON_PRETTY_PRINT ) );
+$message = new AMQPMessage(
+	json_encode( [ 'number' => $argv[1] ], JSON_PRETTY_PRINT ),
+	[
+		'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
+	]
+);
 $channel->basic_publish( $message, '', 'commands' );
 
 echo " [x] Message sent: {$argv[1]}\n";
