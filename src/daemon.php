@@ -29,9 +29,9 @@ $daemonId = sprintf( 'D-%03d', mt_rand( 1, 100 ) );
 $callback = function ( AMQPMessage $message ) use ( $unixDomainSocket, $daemonId )
 {
 	# Decode the json message and encode it for sending to php-fpm
-	$messageArray           = json_decode( $message->getBody(), true );
-	$messageArray['daemon'] = $daemonId;
-	$body                   = http_build_query( $messageArray );
+	$messageArray             = json_decode( $message->getBody(), true );
+	$messageArray['daemonId'] = $daemonId;
+	$body                     = http_build_query( $messageArray );
 
 	# Send an async request to php-fpm pool and receive a process ID
 	$fpmClient = new Client( $unixDomainSocket );

@@ -18,13 +18,17 @@ $channel    = $connection->channel();
 # Make the queue persistent (set 3rd parameter to true)
 $channel->queue_declare( 'commands', false, true );
 
+$payload = json_encode( [ 'number' => $argv[1] ], JSON_PRETTY_PRINT );
+
 # Create and send the message
 $message = new AMQPMessage(
-	json_encode( [ 'number' => $argv[1] ], JSON_PRETTY_PRINT ),
+	$payload,
 	[
+		# Make message persistent
 		'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
 	]
 );
+
 $channel->basic_publish( $message, '', 'commands' );
 
 echo " [x] Message sent: {$argv[1]}\n";
