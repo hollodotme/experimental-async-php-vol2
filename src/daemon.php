@@ -6,6 +6,7 @@
 namespace hollodotme\AsyncPhp;
 
 use hollodotme\FastCGI\Client;
+use hollodotme\FastCGI\Requests\PostRequest;
 use hollodotme\FastCGI\SocketConnections\UnixDomainSocket;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -23,7 +24,7 @@ $channel->queue_declare( 'commands', false, true );
 # Prepare the Fast CGI Client
 $unixDomainSocket = new UnixDomainSocket( 'unix:///var/run/php/php7.1-fpm-commands.sock' );
 
-$daemonId = sprintf( 'D-%03d', mt_rand( 1, 100 ) );
+$daemonId = sprintf( 'D-%03d', random_int( 1, 100 ) );
 
 # Define a callback function that is invoked whenever a message is consumed
 $callback = function ( AMQPMessage $message ) use ( $unixDomainSocket, $daemonId )
@@ -35,23 +36,10 @@ $callback = function ( AMQPMessage $message ) use ( $unixDomainSocket, $daemonId
 
 	# Send an async request to php-fpm pool and receive a process ID
 	$fpmClient = new Client( $unixDomainSocket );
-	$processId = $fpmClient->sendAsyncRequest(
-		[
-			'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-			'REQUEST_METHOD'    => 'POST',
-			'SCRIPT_FILENAME'   => '/vagrant/src/worker.php',
-			'SERVER_SOFTWARE'   => 'php/fcgiclient',
-			'REMOTE_ADDR'       => '127.0.0.1',
-			'REMOTE_PORT'       => '9985',
-			'SERVER_ADDR'       => '127.0.0.1',
-			'SERVER_PORT'       => '80',
-			'SERVER_NAME'       => 'myServer',
-			'SERVER_PROTOCOL'   => 'HTTP/1.1',
-			'CONTENT_TYPE'      => 'application/x-www-form-urlencoded',
-			'CONTENT_LENGTH'    => mb_strlen( $body ),
-		],
-		$body
-	);
+
+	$request = new PostRequest( '/vagrant/src/worker.php', $body );
+
+	$processId = $fpmClient->sendAsyncRequest( $request );
 
 	echo " [x] Spawned process with ID {$processId} for message number {$messageArray['number']}\n";
 
