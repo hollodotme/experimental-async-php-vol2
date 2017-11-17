@@ -1,5 +1,4 @@
 /.idea/
 /.vagrant
 /vendor
-/Vagrantfile
 /composer.lock
